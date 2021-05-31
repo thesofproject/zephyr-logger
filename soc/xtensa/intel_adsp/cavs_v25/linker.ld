@@ -29,6 +29,25 @@ PROVIDE(_MemErrorHandler = 0x00000000);
 #define ROMABLE_REGION ram :ram_phdr
 #define LP_SRAM_REGION lpram
 
+/* DSP RAM regions (all of them) are mapped twice on the DSP: once in
+ * a 512MB region from 0x80000000-0x9fffffff and again from
+ * 0xa0000000-0xbfffffff.  The first mapping is set up to bypass the
+ * L1 cache, so it must be used when multiprocessor coherence is
+ * desired, where the latter mapping is best used for processor-local
+ * data (e.g. stacks) or shared data that is managed with explicit
+ * cache flush/invalidate operations.
+ *
+ * These macros will set up a segment start address correctly,
+ * including alignment to a cache line.  Be sure to also emit the
+ * section to ">ram :ram_phdr" or ">ucram :ucram_phdr" as
+ * appropriate. (Forgetting the correct PHDR will actually work, as
+ * the output tooling ignores it, but it will cause the linker to emit
+ * 512MB of unused data into the output file!)
+ *
+ */
+#define SEGSTART_CACHED   (ALIGN(64) | 0x20000000)
+#define SEGSTART_UNCACHED (ALIGN(64) & ~0x20000000)
+
 MEMORY
 {
   vector_memory_lit :
@@ -97,6 +116,9 @@ MEMORY
   ram :
 	org = RAM_BASE,
 	len = RAM_SIZE
+  ucram :
+	org = RAM_BASE - 0x20000000,
+	len = RAM_SIZE
 #ifdef CONFIG_GEN_ISR_TABLES
   IDT_LIST :
 	org = IDT_BASE,
@@ -154,6 +176,7 @@ PHDRS
   vector_double_lit_phdr PT_LOAD;
   vector_double_text_phdr PT_LOAD;
   ram_phdr PT_LOAD;
+  ucram_phdr PT_LOAD;
 
   static_uuid_entries_phdr PT_NOTE;
   static_log_entries_phdr PT_NOTE;
@@ -451,13 +474,13 @@ SECTIONS
     KEEP (*(.fw_ready_metadata))
   } >ram :ram_phdr
 
-  .noinit : ALIGN(4)
+  .noinit SEGSTART_UNCACHED : ALIGN(4)
   {
     *(.noinit)
     *(.noinit.*)
-  } >ram :ram_phdr
+  } >ucram :ucram_phdr
 
-  .data : ALIGN(4)
+  .data SEGSTART_CACHED : ALIGN(4)
   {
     _data_start = ABSOLUTE(.);
     *(.data)
