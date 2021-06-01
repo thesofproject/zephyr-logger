@@ -514,7 +514,7 @@ SECTIONS
   } >ram :ram_phdr
 #include <linker/common-ram.ld>
 
-  .AltBootManifest : ALIGN(8)
+  .AltBootManifest SEGSTART_CACHED : ALIGN(8)
   {
     /* Single entry of strorage manifest
      * consist of 3 items. Entries array
@@ -538,7 +538,7 @@ SECTIONS
 	_loader_storage_manifest_end = ABSOLUTE(.);
   } >ram :ram_phdr
 
-  .bss (NOLOAD) : ALIGN(4096)
+  .bss SEGSTART_CACHED (NOLOAD) : ALIGN(4096)
   {
     . = ALIGN(4096);
     _bss_start = ABSOLUTE(.);
@@ -560,9 +560,13 @@ SECTIONS
   } >ram :ram_phdr
 
   /* stack */
+  . = SEGSTART_UNCACHED;
   _end = ALIGN(8);
   PROVIDE(end = ALIGN(8));
+  . = SEGSTART_CACHED;
   __stack = L2_SRAM_BASE + L2_SRAM_SIZE;
+  . = SEGSTART_UNCACHED;
+
   /* dma buffers */
   .lpbuf (NOLOAD): ALIGN(4)
   {
