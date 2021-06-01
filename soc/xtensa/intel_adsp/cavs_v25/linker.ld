@@ -500,7 +500,7 @@ SECTIONS
     _data_end = ABSOLUTE(.);
     . = ALIGN(4096);
   } >ram :ram_phdr
-  .lit4 : ALIGN(4)
+  .lit4 SEGSTART_CACHED : ALIGN(4)
   {
     _lit4_start = ABSOLUTE(.);
     *(*.lit4)
@@ -508,7 +508,7 @@ SECTIONS
     *(.gnu.linkonce.lit4.*)
     _lit4_end = ABSOLUTE(.);
   } >ram :ram_phdr
-  .cached :
+  .cached SEGSTART_CACHED :
   {
     *(.cached .cached.*)
   } >ram :ram_phdr
