@@ -543,9 +543,9 @@ SECTIONS
     *(.tm_clone_table)
   } >ram :ram_phdr
 
-  .bss SEGSTART_CACHED (NOLOAD) : ALIGN(4096)
+  .bss SEGSTART_UNCACHED (NOLOAD) : ALIGN(4096)
   {
-    . = ALIGN(4096);
+    .  = ALIGN(4096);
     _bss_start = ABSOLUTE(.);
     *(.dynsbss)
     *(.sbss)
@@ -562,7 +562,7 @@ SECTIONS
     *(COMMON)
     . = ALIGN(8);
     _bss_end = ABSOLUTE(.);
-  } >ram :ram_phdr
+  } >ucram :ucram_phdr
 
   /* stack */
   . = SEGSTART_UNCACHED;
