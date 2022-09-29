@@ -22,6 +22,9 @@ __imr void power_init(void)
 {
 	/* Disable idle power gating */
 	DFDSPBRCP.bootctl[0].bctl |= DFDSPBRCP_BCTL_WAITIPCG | DFDSPBRCP_BCTL_WAITIPPG;
+
+	/* Temporary HP clock setup */
+	*((uint32_t*)(0x71B78)) = 0x207;
 }
 
 #ifdef CONFIG_PM
