@@ -686,6 +686,9 @@ static inline void dai_ssp_pm_runtime_dis_ssp_clk_gating(struct dai_intel_ssp *d
 	sys_write32(shim_reg, dai_shim_base(dp) + SHIM_CLKCTL);
 
 	LOG_INF("%s index %d CLKCTL %08x", __func__, index, shim_reg);
+#elif CONFIG_SOC_SERIES_INTEL_ACE1X
+	/* Set master link clock source to Audio Cardinal clock. */
+	sys_write32(sys_read32(dai_shim_base(dp) + SHIM_CLKCTL) | BIT(27), dai_shim_base(dp) + SHIM_CLKCTL);
 #endif
 }
 
